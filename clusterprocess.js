@@ -22,7 +22,6 @@ var workerCount = numCPUs;
 var winston = require('winston');
 var logger = winston;
 winston.remove(winston.transports.Console).add(winston.transports.Console, {
-  level: 'silly',
   colorize: true,
   timestamp: true
 });
@@ -123,6 +122,17 @@ var ClusterProcess = {
     // Fork off the initial workers
     forkNewWorkers();
     logger.info(process.title, 'booted. pid is', process.pid);
+    return this;
+  },
+
+  setLogger: function(loggingInstance) {
+    if(typeof loggingInstance.log === 'function' && typeof loggingInstance.info === 'function' && typeof loggingInstance.warn === 'function' && typeof loggingInstance.error === 'function') {
+      logger = loggingInstance;
+      return this;
+    } else {
+      logger.error('Could not attach new logger because of missing methods.');
+      return 'Could not attach new logger because of missing methods.';
+    }
   }
 };
 

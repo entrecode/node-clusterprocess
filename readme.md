@@ -36,7 +36,7 @@ See `Gruntfile.example.js` for an example Gruntfile for reloading, utilizing the
 
 ## API
 
-ClusterProcess has exactly one available method:
+ClusterProcess offers the following methods:
 
 ### run(executable[, processName])
 
@@ -45,3 +45,11 @@ ClusterProcess has exactly one available method:
 `processName` is optional. If omitted, the process name is taken from your `package.json` `title` property.
 It will be used as process title (what is displayed in 'ps'). 
 It should not be too long according to the [Node.js Documentation](http://nodejs.org/api/process.html#process_process_title). Note that the master process will be called `processName_cp` and the worker processes `processName`. 
+
+### setLogger(loggingInstance)
+
+ClusterProcess uses [Winston](https://github.com/flatiron/winston) by default for nicer logging to stdout/console (with timestamps and colors). You can overwrite this with another (e.g. global) logging instance using this method.
+The logging class is required to provide methods `log`, `info`, `warn` and `error`. 
+While being designed for usage with Winston, other logging frameworks like [Bunyan](https://github.com/trentm/node-bunyan) or [log4js](https://github.com/nomiddlename/log4js-node) *should* also work.
+
+ClusterProcess' methods are chainable, so you can set a logger and call `run()` in one line.
