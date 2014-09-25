@@ -1,0 +1,31 @@
+{
+  "name": "ec.node-clusterprocess",
+  "version": "0.1.0-dev",
+  "description": "Wrapper around Node.js' cluster module for zero-downtime deployment of Node.js Apps. By entrecode.",
+  "main": "clusterprocess.js",
+  "scripts": {
+    "test": "mocha -R spec",
+    "bamboo": "node node_modules/mocha/bin/mocha -R mocha-bamboo-reporter"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@stash.entrecode.de:7999/node/ec.node-clusterprocess.git"
+  },
+  "keywords": [
+    "server",
+    "cluster"
+  ],
+  "author": "deyhle@entrecode.de",
+  "license": "none",
+  "engines": {
+        "node": ">= 0.10.x"
+    },
+  "dependencies": {
+    "winston": "~0.8.0"
+  },
+  "jshintConfig": {
+    "node": true,
+    "quotmark": "single",
+    "laxcomma": true
+  }
+}
