@@ -3,7 +3,7 @@
  * clusterprocess module
  * 
  * @author deyhle@entrecode.de
- * @version v0.1.0-dev
+ * @version v0.1.2-dev
  *
  * Used for startup and managing worker processes.
  * Loosely based on https://gist.github.com/dickeyxxx/0f535be1ada0ea964cae – more info: http://blog.carbonfive.com/2014/06/02/node-js-in-production/
