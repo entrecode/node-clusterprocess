@@ -107,7 +107,8 @@ var ClusterProcess = {
     // or we are processing the workersToStop array restarting each process
     // In either case, we will fork any workers needed
     cluster.on('disconnect', forkNewWorkers);
-
+    cluster.on('exit', forkNewWorkers); // only after disconnect AND exit have fired, the worker count is correct. So
+                                        // better safe than sorry
 
     // HUP signal sent to the master process to start restarting all the workers sequentially
     process.on('SIGHUP', function() {
