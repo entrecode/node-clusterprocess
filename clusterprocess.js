@@ -18,6 +18,7 @@ process.chdir(__dirname);
 var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 var workerCount = numCPUs;
+var path = require('path');
 
 var winston = require('winston');
 var logger = winston;
@@ -47,7 +48,7 @@ var ClusterProcess = {
 
     process.title = processname+'_cp';
     // Defines what each worker needs to run
-    cluster.setupMaster({ exec: '../../'+executable });
+    cluster.setupMaster({ exec: path.resolve('../../'+executable) });
 
     // Gets the count of active workers
     function numWorkers() { 
