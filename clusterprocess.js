@@ -1,12 +1,12 @@
 'use strict';
 /**
  * clusterprocess module
- * 
+ *
  * @author deyhle@entrecode.de
- * @version v0.1.2-dev
  *
  * Used for startup and managing worker processes.
- * Loosely based on https://gist.github.com/dickeyxxx/0f535be1ada0ea964cae – more info: http://blog.carbonfive.com/2014/06/02/node-js-in-production/
+ * Loosely based on https://gist.github.com/dickeyxxx/0f535be1ada0ea964cae – more info:
+ *   http://blog.carbonfive.com/2014/06/02/node-js-in-production/
  *
  */
 process.chdir(__dirname);
@@ -18,15 +18,14 @@ process.chdir(__dirname);
 var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 var workerCount = numCPUs;
-var path = require('path');
 
 var winston = require('winston');
+var semver = require('semver');
 var logger = winston;
 winston.remove(winston.transports.Console).add(winston.transports.Console, {
   colorize: true,
   timestamp: true
 });
-
 
 var ClusterProcess = {
 
@@ -36,8 +35,8 @@ var ClusterProcess = {
       process.exit(1);
     }
 
+    var packageJsonOfParentProject = require('../../package');
     if (!processname) {
-      var packageJsonOfParentProject = require('../../package');
       if (packageJsonOfParentProject.name) {
         processname = packageJsonOfParentProject.name;
       } else {
@@ -45,14 +44,19 @@ var ClusterProcess = {
         process.exit(1);
       }
     }
+    if (packageJsonOfParentProject.engines && packageJsonOfParentProject.engines.hasOwnProperty('node')) {
+      if (!semver.satisfies(process.version, packageJsonOfParentProject.engines.node)) {
+        logger.warn('Node.js version ' + packageJsonOfParentProject.engines.node + ' wanted, but ' + process.version + ' found!');
+      }
+    }
 
-    process.title = processname+'_cp';
+    process.title = processname + '_cp';
     // Defines what each worker needs to run
-    cluster.setupMaster({ exec: path.resolve('../../'+executable) });
+    cluster.setupMaster({exec: '../../' + executable});
 
     // Gets the count of active workers
-    function numWorkers() { 
-       return Object.keys(cluster.workers).length; 
+    function numWorkers() {
+      return Object.keys(cluster.workers).length;
     }
 
     var stopping = false;
@@ -60,8 +64,8 @@ var ClusterProcess = {
     // Forks off the workers unless the server is stopping
     function forkNewWorkers() {
       if (!stopping) {
-        for (var i = numWorkers(); i < workerCount; i++) { 
-          cluster.fork(); 
+        for (var i = numWorkers(); i < workerCount; i++) {
+          cluster.fork();
         }
       }
     }
@@ -88,7 +92,9 @@ var ClusterProcess = {
     function stopNextWorker() {
       var i = workersToStop.pop();
       var worker = cluster.workers[i];
-      if (worker) stopWorker(worker);
+      if (worker) {
+        stopWorker(worker);
+      }
     }
 
     // Stops all the works at once
@@ -128,7 +134,7 @@ var ClusterProcess = {
   },
 
   setLogger: function(loggingInstance) {
-    if(typeof loggingInstance.log === 'function' && typeof loggingInstance.info === 'function' && typeof loggingInstance.warn === 'function' && typeof loggingInstance.error === 'function') {
+    if (typeof loggingInstance.log === 'function' && typeof loggingInstance.info === 'function' && typeof loggingInstance.warn === 'function' && typeof loggingInstance.error === 'function') {
       logger = loggingInstance;
       return this;
     } else {
