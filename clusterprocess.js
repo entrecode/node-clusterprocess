@@ -21,6 +21,8 @@ var workerCount = numCPUs;
 
 var winston = require('winston');
 var semver = require('semver');
+var path = require('path');
+
 var logger = winston;
 winston.remove(winston.transports.Console).add(winston.transports.Console, {
   colorize: true,
@@ -52,7 +54,7 @@ var ClusterProcess = {
 
     process.title = processname + '_cp';
     // Defines what each worker needs to run
-    cluster.setupMaster({exec: '../../' + executable});
+    cluster.setupMaster({exec: path.resolve('../../' + executable)});
 
     // Gets the count of active workers
     function numWorkers() {
