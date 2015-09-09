@@ -5,8 +5,8 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     run: {
-      commands: {
-        exec: 'pkill -hup -x appserver',
+      reloadWorkers: {
+        exec: 'pkill -hup -x appserver_cp'
       }
     }
   });

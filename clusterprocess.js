@@ -9,7 +9,6 @@
  *   http://blog.carbonfive.com/2014/06/02/node-js-in-production/
  *
  */
-process.chdir(__dirname);
 
 // This script will boot a given app.js with the number of available CPUs.
 //
@@ -37,7 +36,7 @@ var ClusterProcess = {
       process.exit(1);
     }
 
-    var packageJsonOfParentProject = require('../../package');
+    var packageJsonOfParentProject = require(path.resolve(__dirname, '../../package'));
     if (!processname) {
       if (packageJsonOfParentProject.name) {
         processname = packageJsonOfParentProject.name;
@@ -54,7 +53,7 @@ var ClusterProcess = {
 
     process.title = processname + '_cp';
     // Defines what each worker needs to run
-    cluster.setupMaster({exec: path.resolve('../../' + executable)});
+    cluster.setupMaster({exec: path.resolve(__dirname, '../../', executable)});
 
     // Gets the count of active workers
     function numWorkers() {
@@ -148,4 +147,3 @@ var ClusterProcess = {
 
 // export the class
 module.exports = ClusterProcess;
-

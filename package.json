@@ -1,6 +1,6 @@
 {
   "name": "ec.node-clusterprocess",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Wrapper around Node.js' cluster module for zero-downtime deployment of Node.js Apps. By entrecode.",
   "main": "clusterprocess.js",
   "scripts": {
