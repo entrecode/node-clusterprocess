@@ -1,6 +1,6 @@
 {
   "name": "ec.node-clusterprocess",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Wrapper around Node.js' cluster module for zero-downtime deployment of Node.js Apps. By entrecode.",
   "main": "clusterprocess.js",
   "scripts": {
@@ -16,13 +16,13 @@
     "cluster"
   ],
   "author": "deyhle@entrecode.de",
-  "license": "none",
+  "private": true,
   "engines": {
-    "node": ">= 0.10.x"
+    "node": ">= 4.2.x"
   },
   "dependencies": {
-    "semver": "^5.0.3",
-    "winston": "^1.0.2"
+    "semver": "^5.1.0",
+    "winston": "^2.1.1"
   },
   "jshintConfig": {
     "node": true,
