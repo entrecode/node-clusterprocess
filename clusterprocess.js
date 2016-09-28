@@ -15,8 +15,8 @@
 // The master will respond to SIGHUP, which will trigger
 // restarting all the workers and reloading the app.
 var cluster = require('cluster');
-var numCPUs = require('os').cpus().length;
-var workerCount = numCPUs;
+var os = require('os');
+var numWorker = os.cpus().length;
 
 var winston = require('winston');
 var semver = require('semver');
@@ -29,6 +29,10 @@ winston.remove(winston.transports.Console).add(winston.transports.Console, {
   handleExceptions: true,
   humanReadableUnhandledException: true
 });
+
+if (process.env.EC_CLUSTER_MAX_WORKER) {
+  numWorker = Number.parseInt(process.env.EC_CLUSTER_MAX_WORKER);
+}
 
 var ClusterProcess = {
 
@@ -67,7 +71,7 @@ var ClusterProcess = {
     // Forks off the workers unless the server is stopping
     function forkNewWorkers() {
       if (!stopping) {
-        for (var i = numWorkers(); i < workerCount; i++) {
+        for (var i = numWorkers(); i < numWorker; i++) {
           cluster.fork();
         }
       }
