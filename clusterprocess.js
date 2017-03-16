@@ -140,7 +140,7 @@ const ClusterProcess = {
   },
 
   handleSignals(cleanFunc, timeout) {
-    const func = cleanFunc || () => undefined;
+    const func = cleanFunc || (() => undefined);
 
     if (typeof func !== 'function') {
       throw new Error('cleanFunc must be a function');
