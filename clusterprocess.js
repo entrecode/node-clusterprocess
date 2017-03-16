@@ -1,4 +1,3 @@
-'use strict';
 /**
  * clusterprocess module
  *
@@ -8,42 +7,33 @@
  * Loosely based on https://gist.github.com/dickeyxxx/0f535be1ada0ea964cae – more info:
  *   http://blog.carbonfive.com/2014/06/02/node-js-in-production/
  *
+ * This script will boot a given app.js with the number of available CPUs or EC_CLUSTER_MAX_WORKER.
+ *   The master will respond to SIGHUP, which will trigger restarting all the workers and reloading
+ *   the app.
  */
+const cluster = require('cluster');
+const os = require('os');
+const path = require('path');
 
-// This script will boot a given app.js with the number of available CPUs.
-//
-// The master will respond to SIGHUP, which will trigger
-// restarting all the workers and reloading the app.
-var cluster = require('cluster');
-var os = require('os');
-var numWorker = os.cpus().length;
-
-var winston = require('winston');
-var semver = require('semver');
-var path = require('path');
-
-var logger = winston;
-winston.remove(winston.transports.Console).add(winston.transports.Console, {
-  colorize: true,
-  timestamp: true,
-  handleExceptions: true,
-  humanReadableUnhandledException: true
-});
+let numWorker = os.cpus().length;
+let logger = console;
 
 if (process.env.EC_CLUSTER_MAX_WORKER) {
-  numWorker = Number.parseInt(process.env.EC_CLUSTER_MAX_WORKER);
+  numWorker = Number.parseInt(process.env.EC_CLUSTER_MAX_WORKER, 10);
 }
 
-var ClusterProcess = {
+const ClusterProcess = {
 
-  run: function(executable, processname) {
+  run(executable, name) {
     if (!executable) {
       logger.error('No executable specified (first parameter)');
       process.exit(1);
     }
 
-    var packageJsonOfParentProject = require(path.resolve(__dirname, '../../package'));
+    let processname = name;
+
     if (!processname) {
+      const packageJsonOfParentProject = require(path.resolve(__dirname, '../../package'));
       if (packageJsonOfParentProject.name) {
         processname = packageJsonOfParentProject.name;
       } else {
@@ -51,41 +41,40 @@ var ClusterProcess = {
         process.exit(1);
       }
     }
-    if (packageJsonOfParentProject.engines && packageJsonOfParentProject.engines.hasOwnProperty('node')) {
-      if (!semver.satisfies(process.version, packageJsonOfParentProject.engines.node)) {
-        logger.warn('Node.js version ' + packageJsonOfParentProject.engines.node + ' wanted, but ' + process.version + ' found!');
-      }
-    }
 
-    process.title = processname + '_cp';
+    process.title = `${processname}_cp`;
+
     // Defines what each worker needs to run
-    cluster.setupMaster({exec: path.resolve(__dirname, '../../', executable)});
+    cluster.setupMaster({ exec: path.resolve(path.dirname(module.parent.filename), executable) });
 
     // Gets the count of active workers
     function numWorkers() {
       return Object.keys(cluster.workers).length;
     }
 
-    var stopping = false;
+    let stopping = false;
 
     // Forks off the workers unless the server is stopping
-    function forkNewWorkers() {
+    function forkNewWorkers(worker) {
       if (!stopping) {
-        for (var i = numWorkers(); i < numWorker; i++) {
-          cluster.fork();
-        }
+        const timeout = worker && !worker.exitedAfterDisconnect ? 2000 : 0;
+        setTimeout(() => {
+          for (let i = numWorkers(); i < numWorker; i += 1) {
+            cluster.fork();
+          }
+        }, timeout);
       }
     }
 
     // A list of workers queued for a restart
-    var workersToStop = [];
+    let workersToStop = [];
 
     // Stops a single worker
     // Gives 20 seconds after disconnect before SIGTERM
     function stopWorker(worker) {
       logger.info('stopping worker', worker.process.pid);
       worker.disconnect();
-      var killTimer = setTimeout(function() {
+      const killTimer = setTimeout(() => {
         worker.kill();
       }, 20000);
 
@@ -95,12 +84,12 @@ var ClusterProcess = {
 
     // Tell the next worker queued to restart to disconnect
     // This will allow the process to finish it's work
-    // for 60 seconds before sending SIGTERM
+    // for 20 seconds before sending SIGTERM
     function stopNextWorker() {
-      var i = workersToStop.pop();
-      var worker = cluster.workers[i];
-      if (worker) {
-        stopWorker(worker);
+      const i = workersToStop.pop();
+
+      if (cluster.workers[i]) {
+        stopWorker(cluster.workers[i]);
       }
     }
 
@@ -108,9 +97,9 @@ var ClusterProcess = {
     function stopAllWorkers() {
       stopping = true;
       logger.info('stopping all workers');
-      for (var id in cluster.workers) {
+      cluster.workers.forEach((id) => {
         stopWorker(cluster.workers[id]);
-      }
+      });
     }
 
     // Worker is now listening on a port
@@ -120,12 +109,12 @@ var ClusterProcess = {
     // A worker has disconnected either because the process was killed
     // or we are processing the workersToStop array restarting each process
     // In either case, we will fork any workers needed
-    cluster.on('disconnect', forkNewWorkers);
-    cluster.on('exit', forkNewWorkers); // only after disconnect AND exit have fired, the worker count is correct. So
-                                        // better safe than sorry
+    // cluster.on('disconnect', forkNewWorkers);
+    cluster.on('exit', forkNewWorkers); // only after disconnect AND exit have fired, the worker
+                                        // count is correct. So better safe than sorry
 
     // HUP signal sent to the master process to start restarting all the workers sequentially
-    process.on('SIGHUP', function() {
+    process.on('SIGHUP', () => {
       logger.info('restarting all workers');
       workersToStop = Object.keys(cluster.workers);
       stopNextWorker();
@@ -140,16 +129,50 @@ var ClusterProcess = {
     return this;
   },
 
-  setLogger: function(loggingInstance) {
+  setLogger(loggingInstance) {
     if (typeof loggingInstance.log === 'function' && typeof loggingInstance.info === 'function' && typeof loggingInstance.warn === 'function' && typeof loggingInstance.error === 'function') {
       logger = loggingInstance;
       return this;
-    } else {
-      logger.error('Could not attach new logger because of missing methods.');
-      return 'Could not attach new logger because of missing methods.';
     }
-  }
+
+    logger.error('Could not attach new logger because of missing methods.');
+    return this;
+  },
+
+  handleSignals(cleanFunc, timeout) {
+    const func = cleanFunc || () => undefined;
+
+    if (typeof func !== 'function') {
+      throw new Error('cleanFunc must be a function');
+    }
+
+    function exitAfterTimeout() {
+      func();
+      setTimeout(() => {
+        if (cluster.worker) {
+          cluster.worker.disconnect();
+        }
+        process.exit(0);
+      }, timeout || 2000);
+    }
+
+    process.on('SIGHUP', () => {
+      console.info(`${process.pid} got SIGHUP`);
+      exitAfterTimeout();
+    });
+
+    process.on('SIGINT', () => {
+      console.info(`${process.pid} got SIGINT`);
+      exitAfterTimeout();
+    });
+
+    process.on('SIGTERM', () => {
+      console.info(`${process.pid} got SIGTERM`);
+      exitAfterTimeout();
+    });
+
+    return this;
+  },
 };
 
-// export the class
 module.exports = ClusterProcess;
