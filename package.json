@@ -5,7 +5,7 @@
   "private": true,
   "main": "clusterprocess.js",
   "scripts": {
-    "test": "echo \"no tests specified\" && exit 1"
+    "test": "NODE_ENV=testing mocha -R spec test/**/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,9 @@
   "engines": {
     "node": ">= 6.9.x"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
   }
 }
