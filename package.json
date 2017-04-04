@@ -1,11 +1,11 @@
 {
   "name": "ec.node-clusterprocess",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Wrapper around Node.js' cluster module for zero-downtime deployment of Node.js Apps. By entrecode.",
   "private": true,
   "main": "clusterprocess.js",
   "scripts": {
-    "test": "echo \"no tests specified\" && exit 1"
+    "test": "NODE_ENV=testing mocha -R spec test/**/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,10 @@
   "engines": {
     "node": ">= 6.9.x"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "express": "^4.15.2",
+    "mocha": "^3.2.0"
   }
 }
