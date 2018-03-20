@@ -1,6 +1,6 @@
 {
-  "name": "ec.node-clusterprocess",
-  "version": "0.2.1",
+  "name": "node-clusterprocess",
+  "version": "0.3.0",
   "description": "Wrapper around Node.js' cluster module for zero-downtime deployment of Node.js Apps. By entrecode.",
   "private": true,
   "main": "clusterprocess.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "ssh://git@stash.entrecode.de:7999/node/ec.node-clusterprocess.git"
+    "url": "ssh://git@github.com:entrecode/node-clusterprocess.git"
   },
   "keywords": [
     "server",
@@ -21,7 +21,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "chai": "^3.5.0",
+    "chai": "^4.1.0",
     "express": "^4.15.2",
     "mocha": "^3.2.0"
   }

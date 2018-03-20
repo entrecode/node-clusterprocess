@@ -1,4 +1,4 @@
-# ec.node-clusterprocess
+# node-clusterprocess
 
 Wrapper around Node.js' cluster module for zero-downtime deployment of Node.js Apps. By entrecode.
 
@@ -11,7 +11,7 @@ It can be used by basically any Node.js Application to enable zero-downtime depl
 *server.js:*
 
 ```js
-require('ec.node-clusterprocess').run('app.js', 'myApp');
+require('node-clusterprocess').run('app.js', 'myApp');
 ```
 
 
