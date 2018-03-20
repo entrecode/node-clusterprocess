@@ -1,6 +1,6 @@
 {
   "name": "node-clusterprocess",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Wrapper around Node.js' cluster module for zero-downtime deployment of Node.js Apps. By entrecode.",
   "licencse": "ISC",
   "main": "clusterprocess.js",
