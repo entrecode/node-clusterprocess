@@ -1,6 +1,8 @@
 # node-clusterprocess
 
-Wrapper around Node.js' cluster module for zero-downtime deployment of Node.js Apps. By entrecode.
+> Wrapper around Node.js' cluster module for zero-downtime deployment of Node.js Apps. By entrecode.
+
+[![npm version][npm-image]][npm-url]
 
 ## What is this and what does it do?
 This module supports node's clustering to utilize multi-core systems.
@@ -54,3 +56,10 @@ The logging class is required to provide methods `log`, `info`, `warn` and `erro
 ClusterProcess can handle signals `SIGHUP`, `SIGINT`, and `SIGTERM`. An optional `cleanFunc` can be provided and ClusterProcess will call this function prior to exiting the process. Default timeout for exit is 2000ms but can be overwritten by `timeout`.
 
 ClusterProcess' methods are chainable, so you can set a logger, call `handleSignals()`, and call `run()` in one line.
+
+[npm-image]: https://badge.fury.io/js/node-clusterprocess.svg
+[npm-url]: https://www.npmjs.com/package/node-clusterprocess
+[travis-image]: https://travis-ci.org/entrecode/node-clusterprocess.svg?branch=master
+[travis-url]: https://travis-ci.org/entrecode/node-clusterprocess
+[cover-image]: https://coveralls.io/repos/github/entrecode/node-clusterprocess/badge.svg?branch=master
+[cover-url]: https://coveralls.io/github/entrecode/node-clusterprocess?branch=master
