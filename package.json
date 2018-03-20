@@ -1,8 +1,8 @@
 {
   "name": "node-clusterprocess",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Wrapper around Node.js' cluster module for zero-downtime deployment of Node.js Apps. By entrecode.",
-  "private": true,
+  "licencse": "ISC",
   "main": "clusterprocess.js",
   "scripts": {
     "test": "NODE_ENV=testing mocha -R spec test/**/*.test.js"
@@ -13,9 +13,10 @@
   },
   "keywords": [
     "server",
-    "cluster"
+    "cluster",
+    "node"
   ],
-  "author": "deyhle@entrecode.de",
+  "author": "Ruben Deyhle <deyhle@entrecode.de>",
   "engines": {
     "node": ">= 6.9.x"
   },

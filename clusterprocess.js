@@ -7,7 +7,7 @@
  * Loosely based on https://gist.github.com/dickeyxxx/0f535be1ada0ea964cae – more info:
  *   http://blog.carbonfive.com/2014/06/02/node-js-in-production/
  *
- * This script will boot a given app.js with the number of available CPUs or EC_CLUSTER_MAX_WORKER.
+ * This script will boot a given app.js with the number of available CPUs or NODE_CLUSTER_MAX_WORKER.
  *   The master will respond to SIGHUP, which will trigger restarting all the workers and reloading
  *   the app.
  */
@@ -18,8 +18,8 @@ const path = require('path');
 let numWorker = os.cpus().length;
 let logger = console;
 
-if (process.env.EC_CLUSTER_MAX_WORKER) {
-  numWorker = Number.parseInt(process.env.EC_CLUSTER_MAX_WORKER, 10);
+if (process.env.NODE_CLUSTER_MAX_WORKER) {
+  numWorker = Number.parseInt(process.env.NODE_CLUSTER_MAX_WORKER, 10);
 }
 
 const ClusterProcess = {

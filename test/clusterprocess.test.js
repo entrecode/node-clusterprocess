@@ -17,7 +17,7 @@ describe('cluster process', () => {
   });
   it.skip('should start 2 worker', (done) => {
     // TODO how can we test this?
-    process.env.EC_CLUSTER_MAX_WORKER = 2;
+    process.env.NODE_CLUSTER_MAX_WORKER = 2;
 
     process.kill(process.pid, 'SIGHUP');
     setTimeout(() => {
@@ -25,6 +25,6 @@ describe('cluster process', () => {
       return done();
     }, 1500);
 
-    delete process.env.EC_CLUSTER_MAX_WORKER;
+    delete process.env.NODE_CLUSTER_MAX_WORKER;
   });
 });
