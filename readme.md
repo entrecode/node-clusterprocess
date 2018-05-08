@@ -57,6 +57,16 @@ ClusterProcess can handle signals `SIGHUP`, `SIGINT`, and `SIGTERM`. An optional
 
 ClusterProcess' methods are chainable, so you can set a logger, call `handleSignals()`, and call `run()` in one line.
 
+## Changelog
+
+#### 1.0.1
+
+* use logger instance instead of console logging
+
+### 1.0.0
+
+* initial public release of node-clusterprocess
+
 [npm-image]: https://badge.fury.io/js/node-clusterprocess.svg
 [npm-url]: https://www.npmjs.com/package/node-clusterprocess
 [travis-image]: https://travis-ci.org/entrecode/node-clusterprocess.svg?branch=master
