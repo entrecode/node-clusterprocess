@@ -70,13 +70,13 @@ const ClusterProcess = {
     let workersToStop = [];
 
     // Stops a single worker
-    // Gives 20 seconds after disconnect before SIGTERM
+    // Gives 10 seconds after SIGTERM before SIGTERM
     function stopWorker(worker) {
       logger.info('stopping worker', worker.process.pid);
-      worker.disconnect();
+      worker.kill('SIGTERM');
       const killTimer = setTimeout(() => {
-        worker.kill();
-      }, 20000);
+        worker.kill('SIGKILL');
+      }, 10000);
 
       // Ensure we don't stay up just for this setTimeout
       killTimer.unref();
@@ -111,7 +111,7 @@ const ClusterProcess = {
     // In either case, we will fork any workers needed
     // cluster.on('disconnect', forkNewWorkers);
     cluster.on('exit', forkNewWorkers); // only after disconnect AND exit have fired, the worker
-                                        // count is correct. So better safe than sorry
+    // count is correct. So better safe than sorry
 
     // HUP signal sent to the master process to start restarting all the workers sequentially
     process.on('SIGHUP', () => {
