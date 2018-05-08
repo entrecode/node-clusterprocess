@@ -59,6 +59,10 @@ ClusterProcess' methods are chainable, so you can set a logger, call `handleSign
 
 ## Changelog
 
+#### 1.0.2
+
+* fix handling of term signal
+
 #### 1.0.1
 
 * use logger instance instead of console logging

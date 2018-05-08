@@ -97,7 +97,7 @@ const ClusterProcess = {
     function stopAllWorkers() {
       stopping = true;
       logger.info('stopping all workers');
-      cluster.workers.forEach((id) => {
+      Object.keys(cluster.workers).forEach((id) => {
         stopWorker(cluster.workers[id]);
       });
     }
