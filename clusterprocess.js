@@ -157,17 +157,17 @@ const ClusterProcess = {
     }
 
     process.on('SIGHUP', () => {
-      console.info(`${process.pid} got SIGHUP`);
+      logger.info(`${process.pid} got SIGHUP`);
       exitAfterTimeout();
     });
 
     process.on('SIGINT', () => {
-      console.info(`${process.pid} got SIGINT`);
+      logger.info(`${process.pid} got SIGINT`);
       exitAfterTimeout();
     });
 
     process.on('SIGTERM', () => {
-      console.info(`${process.pid} got SIGTERM`);
+      logger.info(`${process.pid} got SIGTERM`);
       exitAfterTimeout();
     });
 
