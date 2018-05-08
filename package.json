@@ -1,6 +1,6 @@
 {
   "name": "node-clusterprocess",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Wrapper around Node.js' cluster module for zero-downtime deployment of Node.js Apps. By entrecode.",
   "licencse": "ISC",
   "main": "clusterprocess.js",
@@ -11,6 +11,7 @@
     "type": "git",
     "url": "ssh://git@github.com:entrecode/node-clusterprocess.git"
   },
+  "license": "ISC",
   "keywords": [
     "server",
     "cluster",
