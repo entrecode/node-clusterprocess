@@ -59,6 +59,10 @@ ClusterProcess' methods are chainable, so you can set a logger, call `handleSign
 
 ## Changelog
 
+## 1.1.0
+
+* changed stop behavior when receiving SIGTERM, will send SIGINT to worker, after 10 seconds will send SIGTERM
+
 #### 1.0.2
 
 * fix handling of term signal
