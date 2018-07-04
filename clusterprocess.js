@@ -125,7 +125,7 @@ const ClusterProcess = {
 
     // Fork off the initial workers
     forkNewWorkers();
-    logger.info(process.title, 'booted. pid is', process.pid, 'scheduling is', cluster.schedulingPolicy === cluster.SCHED_RR ? 'round-robin' : 'off (system)');
+    logger.info(`${process.title} booted. pid is ${process.pid} scheduling is ${cluster.schedulingPolicy === cluster.SCHED_RR ? 'round-robin' : 'off (system)'}`);
     return this;
   },
 
