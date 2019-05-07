@@ -59,6 +59,9 @@ ClusterProcess' methods are chainable, so you can set a logger, call `handleSign
 
 ## Changelog
 
+## 2.0.0
+* removed timeout and exit from handleSignals, parent modul must exit in their cleanup callback
+
 ## 1.1.0
 
 * changed stop behavior when receiving SIGTERM, will send SIGINT to worker, after 10 seconds will send SIGTERM
