@@ -4,7 +4,7 @@
  * @author deyhle@entrecode.de
  *
  * Used for startup and managing worker processes.
- * Loosely based on https://gist.github.com/dickeyxxx/0f535be1ada0ea964cae – more info:
+ * Loosely based on https://gist.github.com/dickeyxxx/0f535be1ada0ea964cae – more info:
  *   http://blog.carbonfive.com/2014/06/02/node-js-in-production/
  *
  * This script will boot a given app.js with the number of available CPUs or NODE_CLUSTER_MAX_WORKER.
@@ -23,7 +23,6 @@ if (process.env.NODE_CLUSTER_MAX_WORKER) {
 }
 
 const ClusterProcess = {
-
   run(executable, name) {
     if (!executable) {
       logger.error('No executable specified (first parameter)');
@@ -38,6 +37,7 @@ const ClusterProcess = {
         processname = packageJsonOfParentProject.name;
       } else {
         logger.error('No project name found. Specify as second parameter or as "name" in your project\'s package.json');
+        // eslint-disable-next-line no-process-exit
         process.exit(1);
       }
     }
@@ -125,12 +125,21 @@ const ClusterProcess = {
 
     // Fork off the initial workers
     forkNewWorkers();
-    logger.info(`${process.title} booted. pid is ${process.pid} scheduling is ${cluster.schedulingPolicy === cluster.SCHED_RR ? 'round-robin' : 'off (system)'}`);
+    logger.info(
+      `${process.title} booted. pid is ${process.pid} scheduling is ${
+        cluster.schedulingPolicy === cluster.SCHED_RR ? 'round-robin' : 'off (system)'
+      }`,
+    );
     return this;
   },
 
   setLogger(loggingInstance) {
-    if (typeof loggingInstance.log === 'function' && typeof loggingInstance.info === 'function' && typeof loggingInstance.warn === 'function' && typeof loggingInstance.error === 'function') {
+    if (
+      typeof loggingInstance.log === 'function' &&
+      typeof loggingInstance.info === 'function' &&
+      typeof loggingInstance.warn === 'function' &&
+      typeof loggingInstance.error === 'function'
+    ) {
       logger = loggingInstance;
       return this;
     }
@@ -139,36 +148,26 @@ const ClusterProcess = {
     return this;
   },
 
-  handleSignals(cleanFunc, timeout) {
+  handleSignals(cleanFunc) {
     const func = cleanFunc || (() => undefined);
 
     if (typeof func !== 'function') {
       throw new Error('cleanFunc must be a function');
     }
 
-    function exitAfterTimeout() {
-      func();
-      setTimeout(() => {
-        if (cluster.worker) {
-          cluster.worker.disconnect();
-        }
-        process.exit(0);
-      }, timeout || 2000);
-    }
-
     process.on('SIGHUP', () => {
       logger.info(`${process.pid} got SIGHUP`);
-      exitAfterTimeout();
+      func();
     });
 
     process.on('SIGINT', () => {
       logger.info(`${process.pid} got SIGINT`);
-      exitAfterTimeout();
+      func();
     });
 
     process.on('SIGTERM', () => {
       logger.info(`${process.pid} got SIGTERM`);
-      exitAfterTimeout();
+      func();
     });
 
     return this;
