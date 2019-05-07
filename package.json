@@ -1,6 +1,6 @@
 {
   "name": "node-clusterprocess",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "Wrapper around Node.js' cluster module for zero-downtime deployment of Node.js Apps. By entrecode.",
   "licencse": "ISC",
   "main": "clusterprocess.js",
@@ -23,8 +23,8 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "chai": "^4.1.0",
-    "express": "^4.15.2",
-    "mocha": "^3.2.0"
+    "chai": "^4.2.0",
+    "express": "^4.16.4",
+    "mocha": "^6.1.4"
   }
 }
