@@ -45,7 +45,7 @@ const ClusterProcess = {
     process.title = `${processname}_cp`;
 
     // Defines what each worker needs to run
-    cluster.setupMaster({ exec: path.resolve(path.dirname(module.parent.filename), executable) });
+    cluster.setupMaster({ exec: path.resolve(__dirname, '../../', executable) });
 
     // Gets the count of active workers
     function numWorkers() {
