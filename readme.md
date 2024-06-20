@@ -59,6 +59,9 @@ ClusterProcess' methods are chainable, so you can set a logger, call `handleSign
 
 ## Changelog
 
+## 2.1.0
+* support for esm modules
+
 ## 2.0.0
 * removed timeout and exit from handleSignals, parent modul must exit in their cleanup callback
 
