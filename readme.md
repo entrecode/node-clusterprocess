@@ -51,13 +51,19 @@ It will be used as process title. It should not be too long according to the [No
 ClusterProcess uses console logging by default for nicer logging to stdout/console (with timestamps and colors). You can overwrite this with another (e.g. global) logging instance using this method.
 The logging class is required to provide methods `log`, `info`, `warn` and `error`. 
 
-### handleSignals([cleanFunc = noop [, timeout = 2000]])
+### handleSignals(cleanFunc = noop)
 
-ClusterProcess can handle signals `SIGHUP`, `SIGINT`, and `SIGTERM`. An optional `cleanFunc` can be provided and ClusterProcess will call this function prior to exiting the process. Default timeout for exit is 2000ms but can be overwritten by `timeout`.
+ClusterProcess can handle signals `SIGHUP`, `SIGINT`, and `SIGTERM`. An `cleanFunc` must be provided and ClusterProcess will call this function on receiving signals.
 
 ClusterProcess' methods are chainable, so you can set a logger, call `handleSignals()`, and call `run()` in one line.
 
 ## Changelog
+
+## 2.1.0
+* support for esm modules
+
+## 2.0.0
+* removed timeout and exit from handleSignals, parent modul must exit in their cleanup callback
 
 ## 1.1.0
 
