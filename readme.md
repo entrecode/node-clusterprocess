@@ -39,12 +39,21 @@ pkill -hup -x myApp_cp
 
 ClusterProcess offers the following methods:
 
-### run(executable[, processName])
+### run(executable[, processName][, options])
 
-`executable` is the name of your main script that should be executed as worker. As path the directory of the requiring module is assumed automatically (`path.dirname(module.parent.filename)`).
+`executable` is the path of your main script that should be executed as worker. A relative path is resolved against your project root (the directory containing `node_modules`), so pass an absolute path (e.g. `path.resolve(__dirname, 'app.js')`) if the worker does not live there.
 
 `processName` is optional. If omitted, the process name is taken from your `package.json` `title` property.
 It will be used as process title. It should not be too long according to the [Node.js Documentation](http://nodejs.org/api/process.html#process_process_title). Note that the master process will be called `processName_cp` and the worker processes should be named `processName-w` by your code.
+
+`options` is optional:
+
+* `killTimeout`: milliseconds a worker gets after `SIGTERM` to finish its work before it is killed with `SIGKILL`. Defaults to the environment variable `NODE_CLUSTER_KILL_TIMEOUT`, otherwise 10000. Keep it below the grace period of your container runtime (Kubernetes: `terminationGracePeriodSeconds`), so the worker is not killed from outside first.
+* `onStop`: function (may return a Promise) called on `SIGTERM` once all workers have exited, e.g. to flush telemetry. The master exits with code 0 afterwards. Without `onStop` the master exits on its own once all workers are gone.
+
+### Graceful shutdown
+
+On `SIGTERM` the master sends `SIGTERM` to all workers and waits for them. A worker that should finish running work (open requests, queue messages) has to handle `SIGTERM` itself (see `handleSignals`) and exit once it is done.
 
 ### setLogger(loggingInstance)
 
@@ -58,6 +67,11 @@ ClusterProcess can handle signals `SIGHUP`, `SIGINT`, and `SIGTERM`. An `cleanFu
 ClusterProcess' methods are chainable, so you can set a logger, call `handleSignals()`, and call `run()` in one line.
 
 ## Changelog
+
+## 2.2.0
+* configurable kill timeout for stopping workers: `killTimeout` option or `NODE_CLUSTER_KILL_TIMEOUT` (default stays 10s)
+* `onStop` option, called on SIGTERM once all workers have exited
+* a worker restart scheduled after a crash no longer forks a new worker if the master was stopped meanwhile
 
 ## 2.1.0
 * support for esm modules
