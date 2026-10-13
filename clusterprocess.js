@@ -22,8 +22,21 @@ if (process.env.NODE_CLUSTER_MAX_WORKER) {
   numWorker = Number.parseInt(process.env.NODE_CLUSTER_MAX_WORKER, 10);
 }
 
+const DEFAULT_KILL_TIMEOUT = 10000;
+
+function resolveKillTimeout(optionValue) {
+  const candidates = [optionValue, process.env.NODE_CLUSTER_KILL_TIMEOUT];
+  for (let i = 0; i < candidates.length; i += 1) {
+    const value = Number.parseInt(candidates[i], 10);
+    if (Number.isFinite(value) && value >= 0) {
+      return value;
+    }
+  }
+  return DEFAULT_KILL_TIMEOUT;
+}
+
 const ClusterProcess = {
-  run(executable, name) {
+  run(executable, name, options = {}) {
     if (!executable) {
       logger.error('No executable specified (first parameter)');
       process.exit(1);
@@ -44,6 +57,9 @@ const ClusterProcess = {
 
     process.title = `${processname}_cp`;
 
+    // Time a worker gets after SIGTERM before it is killed with SIGKILL
+    const killTimeout = resolveKillTimeout(options.killTimeout);
+
     // Defines what each worker needs to run
     cluster.setupMaster({ exec: path.resolve(__dirname, '../../', executable) });
 
@@ -59,7 +75,8 @@ const ClusterProcess = {
       if (!stopping) {
         const timeout = worker && !worker.exitedAfterDisconnect ? 2000 : 0;
         setTimeout(() => {
-          for (let i = numWorkers(); i < numWorker; i += 1) {
+          // the master may have been stopped while waiting
+          for (let i = numWorkers(); i < numWorker && !stopping; i += 1) {
             cluster.fork();
           }
         }, timeout);
@@ -70,21 +87,22 @@ const ClusterProcess = {
     let workersToStop = [];
 
     // Stops a single worker
-    // Gives 10 seconds after SIGTERM before SIGTERM
+    // Gives killTimeout ms after SIGTERM before SIGKILL
     function stopWorker(worker) {
       logger.info('stopping worker', worker.process.pid);
       worker.kill('SIGTERM');
       const killTimer = setTimeout(() => {
+        logger.warn('worker did not stop in time, killing it', worker.process.pid);
         worker.kill('SIGKILL');
-      }, 10000);
+      }, killTimeout);
 
       // Ensure we don't stay up just for this setTimeout
       killTimer.unref();
     }
 
-    // Tell the next worker queued to restart to disconnect
-    // This will allow the process to finish it's work
-    // for 20 seconds before sending SIGTERM
+    // Tell the next worker queued to restart to stop
+    // This will allow the process to finish its work
+    // for killTimeout ms before it is killed
     function stopNextWorker() {
       const i = workersToStop.pop();
 
@@ -93,13 +111,31 @@ const ClusterProcess = {
       }
     }
 
+    // Runs options.onStop once all workers are gone, then exits the master
+    let stopped = false;
+    function finishStop() {
+      if (stopped || typeof options.onStop !== 'function' || numWorkers() > 0) {
+        return;
+      }
+      stopped = true;
+      Promise.resolve()
+        .then(() => options.onStop())
+        .catch((error) => logger.error('onStop failed', error))
+        // eslint-disable-next-line no-process-exit
+        .then(() => process.exit(0));
+    }
+
     // Stops all the works at once
     function stopAllWorkers() {
+      if (stopping) {
+        return;
+      }
       stopping = true;
       logger.info('stopping all workers');
       Object.keys(cluster.workers).forEach((id) => {
         stopWorker(cluster.workers[id]);
       });
+      finishStop();
     }
 
     // Worker is now listening on a port
@@ -112,6 +148,11 @@ const ClusterProcess = {
     // cluster.on('disconnect', forkNewWorkers);
     cluster.on('exit', forkNewWorkers); // only after disconnect AND exit have fired, the worker
     // count is correct. So better safe than sorry
+    cluster.on('exit', () => {
+      if (stopping) {
+        finishStop();
+      }
+    });
 
     // HUP signal sent to the master process to start restarting all the workers sequentially
     process.on('SIGHUP', () => {

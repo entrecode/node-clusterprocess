@@ -1,30 +1,24 @@
-const chai = require('chai');
-const cluster = require('cluster');
-const os = require('os');
-const clusterProcess = require('../clusterprocess');
+const { spawn } = require('child_process');
+const path = require('path');
+const { expect } = require('chai');
 
-const cpus = os.cpus().length;
-const expect = chai.expect;
+describe('cluster process', function () {
+  this.timeout(10000);
 
-describe('cluster process', () => {
-  it('should start #-of-cpus worker', (done) => {
-    clusterProcess.run('worker.js', 'test');
-    setTimeout(() => {
-      expect(Object.keys(cluster.workers).length).to.be.equal(cpus);
-      process.kill(process.pid, 'SIGTERM');
-      return done();
-    }, 500);
-  });
-  it.skip('should start 2 worker', (done) => {
-    // TODO how can we test this?
-    process.env.NODE_CLUSTER_MAX_WORKER = 2;
-
-    process.kill(process.pid, 'SIGHUP');
-    setTimeout(() => {
-      expect(Object.keys(cluster.workers).length).to.be.equal(2);
-      return done();
-    }, 1500);
-
-    delete process.env.NODE_CLUSTER_MAX_WORKER;
+  it('starts NODE_CLUSTER_MAX_WORKER workers', (done) => {
+    const child = spawn(process.execPath, [path.resolve(__dirname, 'fixtures/master.js')], {
+      env: { ...process.env, NODE_CLUSTER_MAX_WORKER: '2' },
+    });
+    let ready = 0;
+    child.stdout.on('data', (chunk) => {
+      ready += chunk.toString().split('\n').filter((line) => line === 'worker: ready').length;
+      if (ready === 2) {
+        child.kill('SIGTERM');
+      }
+    });
+    child.on('exit', () => {
+      expect(ready).to.equal(2);
+      done();
+    });
   });
 });
